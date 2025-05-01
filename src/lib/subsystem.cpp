@@ -4,4 +4,9 @@
 // See the LICENSE file in the root of the project for more information.
 //
 // File: subsystem.cpp
-// Description: Abstract base class for robot subsystems.
+// Description: Abstract base class for robot subsystems. NOTE Currently just
+// here to look pretty. This file serves no meaningful purpose at this point.
+
+#include "lib/subsystem.h"
+
+namespace lib {}
