@@ -20,7 +20,7 @@
 
 using namespace vex;
 
-bool RUN_TELEOP = true;
+const bool RUN_TELEOP = true;
 
 int main() {
   // Initializing Robot Configuration. DO NOT REMOVE!
@@ -47,7 +47,7 @@ int main() {
         clawMotor.stop();
       }
 
-      // Brain.Screen.print("ARM POSITION" + armMotor.position(degrees));
+      printf("ARM POSITION: %f\n", armMotor.position(degrees));
   
       wait(5, msec);
     }
