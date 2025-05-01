@@ -1,12 +1,10 @@
-/*----------------------------------------------------------------------------*/
-/*                                                                            */
-/*    Module:       main.cpp                                                  */
-/*    Author:       Jack Demeterio                                            */
-/*    Created:      Wed April 30 2025                                         */
-/*    Description:  Clawbot (modified with sensors)                           */
-/*    Class: Honors Aerospace Engineering                                     */
-/*                                                                            */
-/*----------------------------------------------------------------------------*/
+// Copyright (c) 2025 barbute
+// 
+// This file is part of sojourner-spud and is licensed under the MIT License.
+// See the LICENSE file in the root of the project for more information.
+//
+// File: main.cpp
+// Description: Main file for robot program. All execution occurs here.
 
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
