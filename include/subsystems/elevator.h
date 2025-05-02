@@ -9,6 +9,7 @@
 #pragma once
 
 #include "lib/subsystem.h"
+#include "cmath"
 #include "vex.h"
 
 namespace subsystems {
@@ -25,7 +26,7 @@ namespace subsystems {
     void stop() override;
 
     void moveToHeight(double targetHeightMM);
-    void setPowerPercent(double powerPercent);
+    void setVoltage(vex::directionType direction, double voltage);
 
     double getPositionMM();
     bool atTarget();
@@ -35,10 +36,24 @@ namespace subsystems {
     vex::digital_in& limitSwitchUpper;
     vex::digital_in& limitSwitchLower;
 
-    double heightSetpointMM;
-    const double toleranceMM = 1;
+    const double TOLERANCE_MM = 1;
+    const double PITCH_MM = 12.7;
+    const double TEETH = 12;
+    const double PI = 3.14159265;
+    const double PITCH_DIAMETER_MM = (PITCH_MM) / (std::sin(PI / TEETH));
+    const double SPROCKET_CIRCUMFERENCE_MM = PITCH_DIAMETER_MM * PI;
 
+    std::string labelPosition = "E/POSITION_MM";
+    std::string labelAtTarget = "E/AT_TARGET";
+    std::string labelAtUpper = "E/AT_UPPER";
+    std::string labelAtLower = "E/AT_LOWER";
+
+    double heightSetpointMM;
+    
     bool atUpperBound();
     bool atLowerBound();
+
+    double mmToDegrees(double mm);
+    double degreesToMM(double degrees);
   };
 }
