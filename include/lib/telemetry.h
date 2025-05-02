@@ -6,6 +6,8 @@
 // File: telemetry.h
 // Description: Simple file for printing telemetry to console or other sources.
 
+#pragma once
+
 #include <string>
 #include <math.h>
 #include <stdio.h>

@@ -6,6 +6,8 @@
 // File: subsystem.h
 // Description: Abstract base class for robot subsystems.
 
+#pragma once
+
 #include <string>
 #include <math.h>
 #include <stdio.h>

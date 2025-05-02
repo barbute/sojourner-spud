@@ -6,55 +6,52 @@
 // File: main.cpp
 // Description: Main file for robot program. All execution occurs here.
 
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Drivetrain           drivetrain    1, 10, D
-// ClawMotor            motor         3
-// ArmMotor             motor         8
-// ---- END VEXCODE CONFIGURED DEVICES ----
-
 #include "vex.h"
+#include "subsystems/drive.h"
+#include "subsystems/elevator.h"
 
 using namespace vex;
+using signature = vision::signature;
+using code = vision::code;
 
-const bool RUN_TELEOP = true;
+brain Brain;
+
+std::string driveName = "D";
+vex::motor leftMotor(vex::PORT3, vex::gearSetting::ratio18_1, false);
+vex::motor rightMotor(vex::PORT4, vex::gearSetting::ratio18_1, true);
+vex::inertial inertialSensor(vex::PORT6);
+
+vex::color colorSensor(vex::PORT7);
+vex::distance distanceSensor(vex::PORT8);
+
+std::string elevatorName = "E";
+vex::motor elevatorMotor(vex::PORT2, vex::gearSetting::ratio18_1, false);
+vex::digital_in upperLimitSwitch(Brain.ThreeWirePort.A);
+vex::digital_in lowerLimitSwitch(Brain.ThreeWirePort.B);
+
+vex::motor intakeMotor(vex::PORT1, vex::gearSetting::ratio18_1, false);
 
 int main() {
-  // Initializing Robot Configuration. DO NOT REMOVE!
-  vexcodeInit();
-
-  if (RUN_TELEOP) {
-    while (true) {
-      robotDrive.arcade(pilotController.Axis3.position(), pilotController.Axis1.position(), percent);
-
-      if (pilotController.ButtonX.pressing()) {
-        armMotor.spin(forward, 4, volt);
-      } else if (pilotController.ButtonB.pressing()) {
-        armMotor.spin(reverse, 4, volt);
-      } 
-      else {
-        armMotor.stop();
-      }
-  
-      if (pilotController.ButtonY.pressing()) {
-        clawMotor.spin(forward, 4, volt);
-      } else if (pilotController.ButtonA.pressing()) {
-        clawMotor.spin(reverse, 4, volt);
-      } else {
-        clawMotor.stop();
-      }
-
-      printf("ARM POSITION: %f\n", armMotor.position(degrees));
-  
-      wait(5, msec);
-    }
-  } else {
-    robotDrive.driveFor(forward, 12, inches);
-    robotDrive.turnFor(left, 90, degrees);
-    robotDrive.stop();
-    wait(5, msec);
+  Brain.Screen.print("Device initialization...");
+  Brain.Screen.setCursor(2, 1);
+  // calibrate the drivetrain inertial
+  wait(200, msec);
+  inertialSensor.startCalibration(1);
+  Brain.Screen.print("Calibrating Gyro for Drivetrain");
+  // wait for the inertial calibration process to finish
+  while (inertialSensor.isCalibrating()) {
+    wait(25, msec);
   }
+  // reset the screen now that the calibration is complete
+  Brain.Screen.clearScreen();
+  Brain.Screen.setCursor(1, 1);
+  wait(50, msec);
+  Brain.Screen.clearScreen();
+
+  subsystems::Drive drive(driveName, leftMotor, rightMotor, inertialSensor);
+  subsystems::Elevator elevator(elevatorName, elevatorMotor, upperLimitSwitch, lowerLimitSwitch);
+
+  drive.driveDistance(forward, 12, inches);
 
   return 0;
 }

@@ -43,10 +43,10 @@ namespace subsystems {
     const double PITCH_DIAMETER_MM = (PITCH_MM) / (std::sin(PI / TEETH));
     const double SPROCKET_CIRCUMFERENCE_MM = PITCH_DIAMETER_MM * PI;
 
-    std::string labelPosition = "E/POSITION_MM";
-    std::string labelAtTarget = "E/AT_TARGET";
-    std::string labelAtUpper = "E/AT_UPPER";
-    std::string labelAtLower = "E/AT_LOWER";
+    std::string labelPosition = lib::Subsystem::NAME + "/POSITION_MM";
+    std::string labelAtTarget = lib::Subsystem::NAME + "/AT_TARGET";
+    std::string labelAtUpper = lib::Subsystem::NAME + "/AT_UPPER";
+    std::string labelAtLower = lib::Subsystem::NAME + "/AT_LOWER";
 
     double heightSetpointMM;
     
