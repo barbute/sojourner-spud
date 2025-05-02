@@ -37,6 +37,13 @@ namespace lib {
     writeToBrainScreen(label, output);
   }
 
+  void Telemetry::writeOutput(std::string& label, bool output) {
+    std::stringstream ss;
+    ss << label << ": " << output;
+    printf("%s\n", ss.str().c_str());
+    writeToBrainScreen(label, output);
+  }
+
   void Telemetry::writeOutput(std::string& label, std::string& output) {
     std::cout << label + ": " + output;
     writeToBrainScreen(label, output);
@@ -53,18 +60,28 @@ namespace lib {
 
     currentLine++;
   }
+
   void Telemetry::writeToBrainScreen(std::string& label, float output) {
     Brain.Screen.setCursor(10, currentLine * 20);
     Brain.Screen.print("%s: %.2f", label.c_str(), output);
 
     currentLine++;
   }
+
   void Telemetry::writeToBrainScreen(std::string& label, int output) {
     Brain.Screen.setCursor(10, currentLine * 20);
     Brain.Screen.print("%s: %d", label.c_str(), output);
 
     currentLine++;
   }
+
+  void Telemetry::writeToBrainScreen(std::string& label, bool output) {
+    Brain.Screen.setCursor(10, currentLine * 20);
+    Brain.Screen.print("%s: %s", label.c_str(), output);
+
+    currentLine++;
+  }
+
   void Telemetry::writeToBrainScreen(std::string& label, std::string& output) {
     Brain.Screen.setCursor(10, currentLine * 20);
     Brain.Screen.print("%s: %s", label.c_str(), output.c_str());

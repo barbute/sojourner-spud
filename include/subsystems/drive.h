@@ -6,6 +6,8 @@
 // File: drive.h
 // Description: Subsystem to interface with a tank drive
 
+#pragma once
+
 #include "lib/subsystem.h"
 #include "vex.h"
 
@@ -13,25 +15,25 @@ namespace subsystems {
   class Drive : public lib::Subsystem {
   public:
     Drive(
-      motor& leftMotorReference, 
-      motor& rightMotorReference, 
-      inertial& inertialSensorReference);
+      std::string& name,
+      vex::motor& leftMotorReference, 
+      vex::motor& rightMotorReference, 
+      vex::inertial& inertialSensorReference);
 
     void periodic() override;
     void printTelemetry() override;
     void stop() override;
 
     void arcadeDrive(double linearDemandPercent, double rotationalDemandPercent);
-    void driveDistance(double distance, distanceUnits units);
-    void turnToAngle(double angle, rotationUnits units);
+    void driveDistance(vex::directionType direction, double distance, distanceUnits units);
+    void turnToAngle(vex::turnType direction, double angle, rotationUnits units);
 
-    double getHeading();
-    double getDistancedriven();
+    double getHeadingDegrees();
 
   private:
-    motor& leftMotor;
-    motor& rightMotor;
-    inertial& inertialSensor;
+    vex::motor& leftMotor;
+    vex::motor& rightMotor;
+    vex::inertial& inertialSensor;
 
     // Constants for the drive
     const double WHEEL_CIRCUMFERENCE = 319.19;
@@ -42,6 +44,6 @@ namespace subsystems {
     const distanceUnits UNITS = mm;
     const double EXTERNAL_GEAR_RATIO = 1;
 
-    smartdrive robotDrive;
+    vex::smartdrive robotDrive;
   };
 }

@@ -19,7 +19,11 @@ namespace lib {
     static void writeOutput(std::string& label, double output);
     static void writeOutput(std::string& label, float output);
     static void writeOutput(std::string& label, int output);
+    static void writeOutput(std::string& label, bool output);
     static void writeOutput(std::string& label, std::string& output);
+
+    // Clear the brain's screen
+    static void clear();
 
   private:
     static int currentLine;
@@ -27,9 +31,7 @@ namespace lib {
     static void writeToBrainScreen(std::string& label, double output);
     static void writeToBrainScreen(std::string& label, float output);
     static void writeToBrainScreen(std::string& label, int output);
+    static void writeToBrainScreen(std::string& label, bool output);
     static void writeToBrainScreen(std::string& label, std::string& output);
-
-    // Clear the brain's screen
-    static void clear();
   };
 }
