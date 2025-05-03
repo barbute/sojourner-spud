@@ -39,10 +39,13 @@ namespace subsystems {
     robotDrive.arcade(linear, rotate, vex::percent);
   }
 
-  void Drive::driveDistance(
-    vex::directionType direction, double distance, 
-    vex::distanceUnits units) 
-  {
+  void Drive::drive(vex::directionType direction, double speed,
+    vex::velocityUnits units) {
+    robotDrive.drive(direction, speed, units);
+  }
+
+  void Drive::driveDistance(vex::directionType direction, double distance, 
+    vex::distanceUnits units) {
     robotDrive.driveFor(direction, distance, units);
   }
 

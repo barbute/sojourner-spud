@@ -9,6 +9,7 @@
 #include "vex.h"
 #include "subsystems/drive.h"
 #include "subsystems/elevator.h"
+#include "subsystems/intake.h"
 #include "lib/telemetry.h"
 #include <iostream>
 
@@ -31,17 +32,33 @@ vex::motor elevatorMotor(vex::PORT2, vex::gearSetting::ratio18_1, false);
 vex::digital_in upperLimitSwitch(Brain.ThreeWirePort.A);
 vex::digital_in lowerLimitSwitch(Brain.ThreeWirePort.B);
 
+std::string intakeName = "I";
 vex::motor intakeMotor(vex::PORT1, vex::gearSetting::ratio18_1, false);
+// TODO Add this limit switch as it's currently not on the robot yet
+vex::digital_in surfaceLimitSwitch(Brain.ThreeWirePort.C);
+
+// TODO Get these constants
+const double DRIVE_SPEED_RPM = 150.0;
+
+// TODO Get these setpoints
+const double PICKUP_DISTANCE_MM = 40.0;
+const double PREP_PLACE_DISTANCE_MM = 20.0;
+const double PLACE_DISTANCE_MM = 15.0;
 
 // TODO Get these setpoints
 const double PICKUP_HEIGHT_MM = 0.0;
 const double CLEAR_TOP_BOX_HEIGHT_MM = 600.0;
 const double PLACE_CUP_HEIGHT_MM = 550.0;
 
-const double CLAW_OPEN = 0.0;
-const double CLAW_CLOSED = 0.0;
+// TODO Get these setpoints
+const double CLAW_OPEN_ROTATIONS = 100.0;
+const double CLAW_CLOSED_ROTATIONS = 0.0;
+
+// Set to true before running graded performance
+const bool RUN_AUTONOMOUS = false;
 
 int main() {
+  // Initialization routine for devices that need it
   Brain.Screen.print("Device initialization...");
   Brain.Screen.setCursor(2, 1);
   // calibrate the drivetrain inertial
@@ -58,24 +75,55 @@ int main() {
   wait(50, msec);
   Brain.Screen.clearScreen();
 
+  // Instantiate subsystems
   subsystems::Drive drive(driveName, leftMotor, rightMotor, inertialSensor);
-  subsystems::Elevator elevator(elevatorName, elevatorMotor, upperLimitSwitch, lowerLimitSwitch);
+  subsystems::Elevator elevator(elevatorName, elevatorMotor, 
+    upperLimitSwitch, lowerLimitSwitch);
+  subsystems::Intake intake(intakeName, intakeMotor, surfaceLimitSwitch);
 
-  // std::cout << "run forward";
+  if (RUN_AUTONOMOUS) {
+    // Prep Open claw
+    intake.setPosition(CLAW_OPEN_ROTATIONS);
 
-  // drive.driveDistance(forward, 12, inches);
+    // Drive until cup is in front of distance sensor
+    while (distanceSensor.objectDistance(vex::inches) < PICKUP_DISTANCE_MM) {
+      drive.drive(vex::forward, DRIVE_SPEED_RPM, vex::rpm);
+    }
+    drive.stop();
 
-  // std::cout << "stopping";
+    // Close claw
+    intake.setPosition(CLAW_CLOSED_ROTATIONS);
 
-  // drive.stop();
+    // Turn to boxes
+    drive.turnToAngle(vex::left, 90.0, vex::degrees);
 
-  // while (true) {
-  //   elevator.periodic();
+    // Drive until stack of boxes is in front of robot
+    while (distanceSensor.objectDistance(vex::inches) < PREP_PLACE_DISTANCE_MM) {
+      drive.drive(vex::forward, DRIVE_SPEED_RPM, vex::rpm);
+    }
+    drive.stop();
 
-  //   wait(5, msec);
-  // }
+    // Lift elevator to clearence level
+    elevator.moveToHeight(CLEAR_TOP_BOX_HEIGHT_MM);
 
-  elevator.moveToHeight(100);
+    // Drive forward slightly
+    drive.driveDistance(vex::forward, PLACE_DISTANCE_MM, vex::mm);
+
+    // Lower elevator into box
+    elevator.moveToHeight(PLACE_CUP_HEIGHT_MM);
+
+    // Drop cup
+    intake.setPosition(CLAW_OPEN_ROTATIONS);
+
+    // Close claw
+    intake.setPosition(CLAW_CLOSED_ROTATIONS);
+
+    // Drive backward slightly
+    drive.driveDistance(vex::reverse, PREP_PLACE_DISTANCE_MM, vex::mm);
+
+    // Lower elevator to pickup oosition
+    elevator.moveToHeight(PICKUP_HEIGHT_MM);
+  }
 
   return 0;
 }
