@@ -33,6 +33,11 @@ vex::digital_in lowerLimitSwitch(Brain.ThreeWirePort.B);
 
 vex::motor intakeMotor(vex::PORT1, vex::gearSetting::ratio18_1, false);
 
+// TODO Get these setpoints
+const double PICKUP_HEIGHT_MM = 0.0;
+const double CLEAR_TOP_BOX_HEIGHT_MM = 600.0;
+const double PLACE_CUP_HEIGHT_MM = 550.0;
+
 int main() {
   Brain.Screen.print("Device initialization...");
   Brain.Screen.setCursor(2, 1);
