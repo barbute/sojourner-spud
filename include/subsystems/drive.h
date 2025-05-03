@@ -43,7 +43,7 @@ namespace subsystems {
     const double WHEEL_BASE = 120;
     // Units are defined here, so no need to include them in variable name as
     // long as the units are consistent across everything.
-    const vex::distanceUnits UNITS = mm;
+    const vex::distanceUnits UNITS = vex::mm;
     const double EXTERNAL_GEAR_RATIO = 1;
 
     vex::smartdrive robotDrive;

@@ -9,6 +9,9 @@
 #include <lib/telemetry.h>
 #include <sstream>
 #include <iostream>
+#include "vex.h"
+
+using namespace vex;
 
 namespace lib {
   // Manage state of where the cursor on the brain screen is

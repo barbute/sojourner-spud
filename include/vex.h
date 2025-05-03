@@ -17,6 +17,8 @@
 
 // #include "robot-config.h"
 
+extern vex::brain Brain;
+
 #define waitUntil(condition)                                                   \
   do {                                                                         \
     wait(5, msec);                                                             \

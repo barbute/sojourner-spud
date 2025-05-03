@@ -100,6 +100,8 @@ int main() {
     // Drive until stack of boxes is in front of robot
     while (distanceSensor.objectDistance(vex::inches) < PREP_PLACE_DISTANCE_MM) {
       drive.drive(vex::forward, DRIVE_SPEED_RPM, vex::rpm);
+
+      wait(5, vex::msec);
     }
     drive.stop();
 
@@ -123,6 +125,16 @@ int main() {
 
     // Lower elevator to pickup oosition
     elevator.setPositionMM(PICKUP_HEIGHT_MM);
+  } else {
+    // Run periodics which will call telemetry, useful to ensure data
+    // reporting is good
+    while (true) {
+      drive.periodic();
+      elevator.periodic();
+      intake.periodic();
+
+      wait(5, vex::msec);
+    }
   }
 
   return 0;
