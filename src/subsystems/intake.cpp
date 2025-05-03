@@ -5,3 +5,50 @@
 //
 // File: intake.cpp
 // Description: Subsystem to interface with a claw-like intake
+
+#include "subsystems/intake.h"
+#include "lib/telemetry.h"
+
+namespace subsystems {
+  Intake::Intake(
+    std::string& name,
+    vex::motor& motorReference,
+    vex::digital_in& limitSwitchSurfaceReference
+  )
+  :lib::Subsystem(name),
+    motor(motorReference),
+    limitSwitchSurface(limitSwitchSurfaceReference) {}
+
+  void Intake::periodic() {
+    printTelemetry();
+  }
+
+  void Intake::printTelemetry() {
+    lib::Telemetry::writeOutput(labelPosition, getPositionRotations());
+    lib::Telemetry::writeOutput(labelTouchingSurface, touchingSurface());
+  }
+
+  void Intake::stop() {
+    motor.stop();
+  }
+
+  void Intake::setPosition(double targetPositionRotations) {
+    positionSetpointRotations = targetPositionRotations;
+
+    // NOTE the robot program will cease until this action is completed,
+    // may need to remove later if blocking becomes an issue
+    motor.spinToPosition(positionSetpointRotations, rev, true);
+  }
+
+  void Intake::setVoltage(vex::directionType direction, double voltage) {
+    motor.spin(direction, voltage, volt);
+  }
+
+  double Intake::getPositionRotations() {
+    return motor.position(rev);
+  }
+
+  bool Intake::touchingSurface() {
+    return limitSwitchSurface.value() == 1;
+  }
+}

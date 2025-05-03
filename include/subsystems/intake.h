@@ -35,7 +35,9 @@ namespace subsystems {
     // a surface
     vex::digital_in& limitSwitchSurface;
 
-    std::string labelPosition = lib::Subsystem::NAME + "/POSITION_DEGREES";
+    std::string labelPosition = lib::Subsystem::NAME + "/POSITION_ROTATIONS";
     std::string labelTouchingSurface = lib::Subsystem::NAME + "/TOUCHING_SURFACE";
+
+    double positionSetpointRotations;
   };
 }
