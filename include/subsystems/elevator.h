@@ -25,7 +25,7 @@ namespace subsystems {
     void printTelemetry() override;
     void stop() override;
 
-    void moveToHeight(double targetHeightMM);
+    void setPositionMM(double targetHeightMM);
     void setVoltage(vex::directionType direction, double voltage);
 
     double getPositionMM();

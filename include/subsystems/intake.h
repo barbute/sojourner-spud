@@ -23,7 +23,7 @@ namespace subsystems {
     void printTelemetry() override;
     void stop() override;
 
-    void setPosition(double targetPositionRotations);
+    void setPositionRotations(double targetPositionRotations);
     void setVoltage(vex::directionType direction, double voltage);
 
     double getPositionRotations();

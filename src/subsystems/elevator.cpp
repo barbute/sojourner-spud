@@ -37,7 +37,7 @@ namespace subsystems {
     motor.stop();
   }
 
-  void Elevator::moveToHeight(double targetHeightMM) {
+  void Elevator::setPositionMM(double targetHeightMM) {
     heightSetpointMM = targetHeightMM;
 
     if (atUpperBound() && motor.direction() == vex::forward) {

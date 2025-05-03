@@ -32,7 +32,7 @@ namespace subsystems {
     motor.stop();
   }
 
-  void Intake::setPosition(double targetPositionRotations) {
+  void Intake::setPositionRotations(double targetPositionRotations) {
     positionSetpointRotations = targetPositionRotations;
 
     // NOTE the robot program will cease until this action is completed,

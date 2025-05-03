@@ -17,7 +17,7 @@ using namespace vex;
 using signature = vision::signature;
 using code = vision::code;
 
-brain Brain;
+vex::brain Brain;
 
 std::string driveName = "D";
 vex::motor leftMotor(vex::PORT3, vex::gearSetting::ratio18_1, true);
@@ -83,7 +83,7 @@ int main() {
 
   if (RUN_AUTONOMOUS) {
     // Prep Open claw
-    intake.setPosition(CLAW_OPEN_ROTATIONS);
+    intake.setPositionRotations(CLAW_OPEN_ROTATIONS);
 
     // Drive until cup is in front of distance sensor
     while (distanceSensor.objectDistance(vex::inches) < PICKUP_DISTANCE_MM) {
@@ -92,7 +92,7 @@ int main() {
     drive.stop();
 
     // Close claw
-    intake.setPosition(CLAW_CLOSED_ROTATIONS);
+    intake.setPositionRotations(CLAW_CLOSED_ROTATIONS);
 
     // Turn to boxes
     drive.turnToAngle(vex::left, 90.0, vex::degrees);
@@ -104,25 +104,25 @@ int main() {
     drive.stop();
 
     // Lift elevator to clearence level
-    elevator.moveToHeight(CLEAR_TOP_BOX_HEIGHT_MM);
+    elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM);
 
     // Drive forward slightly
     drive.driveDistance(vex::forward, PLACE_DISTANCE_MM, vex::mm);
 
     // Lower elevator into box
-    elevator.moveToHeight(PLACE_CUP_HEIGHT_MM);
+    elevator.setPositionMM(PLACE_CUP_HEIGHT_MM);
 
     // Drop cup
-    intake.setPosition(CLAW_OPEN_ROTATIONS);
+    intake.setPositionRotations(CLAW_OPEN_ROTATIONS);
 
     // Close claw
-    intake.setPosition(CLAW_CLOSED_ROTATIONS);
+    intake.setPositionRotations(CLAW_CLOSED_ROTATIONS);
 
     // Drive backward slightly
     drive.driveDistance(vex::reverse, PREP_PLACE_DISTANCE_MM, vex::mm);
 
     // Lower elevator to pickup oosition
-    elevator.moveToHeight(PICKUP_HEIGHT_MM);
+    elevator.setPositionMM(PICKUP_HEIGHT_MM);
   }
 
   return 0;
