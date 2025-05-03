@@ -28,6 +28,8 @@ namespace lib {
     static void clear();
 
   private:
+    static const bool PRINT_TO_BRAIN = false;
+
     static int currentLine;
 
     static void writeToBrainScreen(std::string& label, double output);

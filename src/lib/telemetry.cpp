@@ -20,39 +20,63 @@ namespace lib {
     std::stringstream ss;
     ss << label << ": " << output;
     printf("%s\n", ss.str().c_str());
-    writeToBrainScreen(label, output);
+    if (PRINT_TO_BRAIN) {
+      writeToBrainScreen(label, output);
+    }
   }
 
   void Telemetry::writeOutput(std::string& label, float output) {
     std::stringstream ss;
     ss << label << ": " << output;
     printf("%s\n", ss.str().c_str());
-    writeToBrainScreen(label, output);
+    if (PRINT_TO_BRAIN) {
+      writeToBrainScreen(label, output);
+    }  
   }
 
   void Telemetry::writeOutput(std::string& label, int output) {
     std::stringstream ss;
     ss << label << ": " << output;
     printf("%s\n", ss.str().c_str());
-    writeToBrainScreen(label, output);
+    if (PRINT_TO_BRAIN) {
+      writeToBrainScreen(label, output);
+    }  
   }
 
   void Telemetry::writeOutput(std::string& label, bool output) {
     std::stringstream ss;
     ss << label << ": " << output;
     printf("%s\n", ss.str().c_str());
-    writeToBrainScreen(label, output);
+    if (PRINT_TO_BRAIN) {
+      writeToBrainScreen(label, output);
+    }
   }
 
   void Telemetry::writeOutput(std::string& label, std::string& output) {
     std::cout << label + ": " + output;
-    writeToBrainScreen(label, output);
+    if (PRINT_TO_BRAIN) {
+      writeToBrainScreen(label, output);
+    }
   }
 
   void Telemetry::clear() {
     Brain.Screen.clearScreen();
     currentLine = 1;
   }
+
+  /*
+  maybe do this later:
+
+  std::stringstream ss;
+  ss << label << ": " << value;
+
+  // Print to console
+  printf("%s\n", ss.str().c_str());
+
+  // Print to Brain screen
+  Brain.Screen.setCursor(1, 1);
+  Brain.Screen.print(ss.str().c_str());
+  */
 
   void Telemetry::writeToBrainScreen(std::string& label, double output) {
     Brain.Screen.setCursor(10, currentLine * 20);

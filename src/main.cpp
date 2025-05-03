@@ -9,6 +9,8 @@
 #include "vex.h"
 #include "subsystems/drive.h"
 #include "subsystems/elevator.h"
+#include "lib/telemetry.h"
+#include <iostream>
 
 using namespace vex;
 using signature = vision::signature;
@@ -17,8 +19,8 @@ using code = vision::code;
 brain Brain;
 
 std::string driveName = "D";
-vex::motor leftMotor(vex::PORT3, vex::gearSetting::ratio18_1, false);
-vex::motor rightMotor(vex::PORT4, vex::gearSetting::ratio18_1, true);
+vex::motor leftMotor(vex::PORT3, vex::gearSetting::ratio18_1, true);
+vex::motor rightMotor(vex::PORT4, vex::gearSetting::ratio18_1, false);
 vex::inertial inertialSensor(vex::PORT6);
 
 vex::color colorSensor(vex::PORT7);
@@ -51,7 +53,21 @@ int main() {
   subsystems::Drive drive(driveName, leftMotor, rightMotor, inertialSensor);
   subsystems::Elevator elevator(elevatorName, elevatorMotor, upperLimitSwitch, lowerLimitSwitch);
 
-  drive.driveDistance(forward, 12, inches);
+  // std::cout << "run forward";
+
+  // drive.driveDistance(forward, 12, inches);
+
+  // std::cout << "stopping";
+
+  // drive.stop();
+
+  // while (true) {
+  //   elevator.periodic();
+
+  //   wait(5, msec);
+  // }
+
+  elevator.moveToHeight(100);
 
   return 0;
 }
