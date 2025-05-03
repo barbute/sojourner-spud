@@ -81,6 +81,10 @@ int main() {
     upperLimitSwitch, lowerLimitSwitch);
   subsystems::Intake intake(intakeName, intakeMotor, surfaceLimitSwitch);
 
+  // NOTE Actions are waiting/blocking by default, meaning the code program
+  // will wait for that action to complete before moveing on, thus why all
+  // actions below can be ordered sequentially with little transition or
+  // scheduling logic
   if (RUN_AUTONOMOUS) {
     // Prep Open claw
     intake.setPositionRotations(CLAW_OPEN_ROTATIONS);

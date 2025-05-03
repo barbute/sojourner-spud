@@ -46,14 +46,14 @@ namespace subsystems {
 
   void Drive::driveDistance(vex::directionType direction, double distance, 
     vex::distanceUnits units) {
-    robotDrive.driveFor(direction, distance, units);
+    robotDrive.driveFor(direction, distance, units, true);
   }
 
   void Drive::turnToAngle(
     vex::turnType direction, double angle,
     vex::rotationUnits units) 
   {
-    robotDrive.turnFor(direction, angle, units);
+    robotDrive.turnFor(direction, angle, units, true);
   }
 
   double Drive::getHeadingDegrees() { 
