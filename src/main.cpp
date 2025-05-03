@@ -38,6 +38,9 @@ const double PICKUP_HEIGHT_MM = 0.0;
 const double CLEAR_TOP_BOX_HEIGHT_MM = 600.0;
 const double PLACE_CUP_HEIGHT_MM = 550.0;
 
+const double CLAW_OPEN = 0.0;
+const double CLAW_CLOSED = 0.0;
+
 int main() {
   Brain.Screen.print("Device initialization...");
   Brain.Screen.setCursor(2, 1);

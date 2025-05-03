@@ -25,7 +25,8 @@ namespace subsystems {
     void stop() override;
 
     void arcadeDrive(double linearDemandPercent, double rotationalDemandPercent);
-    void driveDistance(vex::directionType direction, double distance, distanceUnits units);
+    void driveDistance(vex::directionType direction, double distance, 
+      distanceUnits units);
     void turnToAngle(vex::turnType direction, double angle, rotationUnits units);
 
     double getHeadingDegrees();
