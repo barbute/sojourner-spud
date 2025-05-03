@@ -37,15 +37,15 @@ namespace subsystems {
 
     // NOTE the robot program will cease until this action is completed,
     // may need to remove later if blocking becomes an issue
-    motor.spinToPosition(positionSetpointRotations, rev, true);
+    motor.spinToPosition(positionSetpointRotations, vex::rev, true);
   }
 
   void Intake::setVoltage(vex::directionType direction, double voltage) {
-    motor.spin(direction, voltage, volt);
+    motor.spin(direction, voltage, vex::volt);
   }
 
   double Intake::getPositionRotations() {
-    return motor.position(rev);
+    return motor.position(vex::rev);
   }
 
   bool Intake::touchingSurface() {

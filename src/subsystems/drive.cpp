@@ -36,7 +36,7 @@ namespace subsystems {
   }
 
   void Drive::arcadeDrive(double linear, double rotate) {
-    robotDrive.arcade(linear, rotate, percent);
+    robotDrive.arcade(linear, rotate, vex::percent);
   }
 
   void Drive::driveDistance(
