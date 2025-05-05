@@ -2,7 +2,7 @@
 A program for controlling a VEX V5 robot with a dual-motor tank drive, single-motor single-stage elevator, and claw mechanism. This project was for a school assignment.
 
 ## Description
-The robot is designed to stack cups filled with water on to a raised tray fully autonomously, with pre-defined boundaries and starting positions. This is meant to be easily extensible and upgradeable for future additions or modifications to the robot.
+The robot is designed to stack cups filled with water on to a raised tray fully autonomously, with pre-defined boundaries and starting positions. The robot program adopted a subsystem-based organization model, where hardware components are separated into "subsystems" and can be interacted with there. The `main.cpp` file is where actions can be defined for the autonomous period.
 
 ### Port assignments
 All ports are assigned to their respective devices, where the front of the robot is defined as the side with the claw and counterclockwise is positive.
