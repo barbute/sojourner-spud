@@ -29,8 +29,8 @@ vex::distance distanceSensor(vex::PORT8);
 
 std::string elevatorName = "E";
 vex::motor elevatorMotor(vex::PORT2, vex::gearSetting::ratio18_1, false);
-vex::digital_in upperLimitSwitch(Brain.ThreeWirePort.A);
-vex::digital_in lowerLimitSwitch(Brain.ThreeWirePort.B);
+vex::digital_in upperLimitSwitch(Brain.ThreeWirePort.E);
+vex::digital_in lowerLimitSwitch(Brain.ThreeWirePort.F);
 
 std::string intakeName = "I";
 vex::motor intakeMotor(vex::PORT1, vex::gearSetting::ratio18_1, false);
@@ -133,9 +133,11 @@ int main() {
     // Run periodics which will call telemetry, useful to ensure data
     // reporting is good
     while (true) {
-      drive.periodic();
-      elevator.periodic();
-      intake.periodic();
+      // drive.periodic();
+      // elevator.periodic();
+      // intake.periodic();
+      elevator.printTelemetry();
+      intake.printTelemetry();
 
       wait(5, vex::msec);
     }
