@@ -1,5 +1,5 @@
 # sojourner-spud
-A program for controlling a VEX V5 robot with a dual-motor tank drive, single-motor single-stage elevator, and claw mechanism. This project was for a school assignment.
+A program for controlling a [VEX V5](https://www.vexrobotics.com/v5?srsltid=AfmBOor7LT-k8MatAaz2pKX20vpmfsGfgkzMzOUpa_GgX34ZiYLnXh1O) robot with a dual-motor tank drive, single-motor single-stage elevator, and claw mechanism. This project was for a school assignment. For more information about VEX V5, see [the documentation](https://api.vex.com/v5/home/cpp/index.html).
 
 ## Description
 The robot is designed to stack cups filled with water on to a raised tray fully autonomously, with pre-defined boundaries and starting positions. The robot program adopted a subsystem-based organization model, where hardware components are separated into "subsystems" and can be interacted with there. The `main.cpp` file is where actions can be defined for the autonomous period.
