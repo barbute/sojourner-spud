@@ -12,6 +12,7 @@
 #include "subsystems/intake.h"
 #include "lib/telemetry.h"
 #include <iostream>
+#include <sstream>
 
 using namespace vex;
 using signature = vision::signature;
@@ -24,8 +25,8 @@ vex::motor leftMotor(vex::PORT3, vex::gearSetting::ratio18_1, true);
 vex::motor rightMotor(vex::PORT4, vex::gearSetting::ratio18_1, false);
 vex::inertial inertialSensor(vex::PORT6);
 
-vex::color colorSensor(vex::PORT7);
-vex::distance distanceSensor(vex::PORT8);
+vex::optical opticalSensor(vex::PORT7);
+vex::distance distanceSensor(vex::PORT10);
 
 std::string elevatorName = "E";
 vex::motor elevatorMotor(vex::PORT2, vex::gearSetting::ratio18_1, false);
@@ -35,27 +36,31 @@ vex::digital_in lowerLimitSwitch(Brain.ThreeWirePort.F);
 std::string intakeName = "I";
 vex::motor intakeMotor(vex::PORT1, vex::gearSetting::ratio18_1, false);
 // TODO Add this limit switch as it's currently not on the robot yet
-vex::digital_in surfaceLimitSwitch(Brain.ThreeWirePort.C);
+vex::digital_in surfaceLimitSwitch(Brain.ThreeWirePort.D);
 
-// TODO Get these constants
-const double DRIVE_SPEED_RPM = 150.0;
+const double DRIVE_SPEED_PCT = 20.0;
 
-// TODO Get these setpoints
-const double PICKUP_DISTANCE_MM = 40.0;
-const double PREP_PLACE_DISTANCE_MM = 20.0;
-const double PLACE_DISTANCE_MM = 15.0;
+const double PICKUP_DISTANCE_MM = 77.0;
+const double PREP_PLACE_DISTANCE_MM = 200.0;
+const double PLACE_DISTANCE_MM = 17.0;
 
-// TODO Get these setpoints
 const double PICKUP_HEIGHT_MM = 0.0;
-const double CLEAR_TOP_BOX_HEIGHT_MM = 600.0;
-const double PLACE_CUP_HEIGHT_MM = 550.0;
+const double CLEAR_TOP_BOX_HEIGHT_MM = 582.706;
+const double PLACE_CUP_HEIGHT_MM = 450.0;
+const double STOW_ELEVATOR_MM = 150.0;
 
-// TODO Get these setpoints
-const double CLAW_OPEN_ROTATIONS = 100.0;
-const double CLAW_CLOSED_ROTATIONS = 0.0;
+const double CLAW_OPEN_ROTATIONS = 0.7;
+const double CLAW_CLOSED_ROTATIONS = 0.31;
 
 // Set to true before running graded performance
-const bool RUN_AUTONOMOUS = false;
+const bool RUN_AUTONOMOUS = true;
+// Set to true before running the graded auto
+const bool RUN_MAIN_AUTO = true;
+
+std::string labelDistance = "distance";
+std::string labelColorRed = "colorRed";
+std::string labelColorGreen = "colorGreen";
+std::string labelColorBlue = "colorBlue";
 
 int main() {
   // Initialization routine for devices that need it
@@ -86,49 +91,97 @@ int main() {
   // actions below can be ordered sequentially with little transition or
   // scheduling logic
   if (RUN_AUTONOMOUS) {
-    // Prep Open claw
-    intake.setPositionRotations(CLAW_OPEN_ROTATIONS);
+    if (RUN_MAIN_AUTO) {
+      // Drive until in front of color row one or two
 
-    // Drive until cup is in front of distance sensor
-    while (distanceSensor.objectDistance(vex::inches) < PICKUP_DISTANCE_MM) {
-      drive.drive(vex::forward, DRIVE_SPEED_RPM, vex::rpm);
+      // Turn left 90 deg
+
+      // Drive until on correct color row
+
+      // Turn left 90 deg
+
+      // Pre open claw
+
+      // Go to pickup position
+
+      // Drive until in front of cup
+
+      // Close claw
+
+      // Stow cup
+
+      // Turn left 90 deg
+
+      // Drive to prep placing position
+
+      // Raise elevator to clearence
+
+      // Drive to placeing position
+
+      // Lower elevator to place
+
+      // Open claw
+
+      // Raise elevator to clearence
+
+      // Close claw
+
+      // Drive backwards
+
+      // Lower elevator to pickup
+
+    } else {
+      // Prep Open claw
+      intake.setPositionRotations(CLAW_OPEN_ROTATIONS);
+
+      // Drive until cup is in front of distance sensor
+      while (distanceSensor.objectDistance(vex::mm) > PICKUP_DISTANCE_MM) {
+        drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+      }
+      drive.stop();
+      wait(1, vex::sec);
+  
+      // Close claw
+      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS);
+  
+      // Stow elevator to clear distance sensor
+      elevator.setPositionMM(STOW_ELEVATOR_MM);
+  
+      // Turn to boxes
+      drive.turnToAngle(vex::right, 90.0, vex::degrees);
+  
+      // Drive until stack of boxes is in front of robot
+      while (distanceSensor.objectDistance(vex::mm) > PREP_PLACE_DISTANCE_MM) {
+        drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+  
+        wait(5, vex::msec);
+      }
+      drive.stop();
+  
+      // Lift elevator to clearence level
+      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM);
+  
+      // Drive forward slightly
+      drive.driveDistance(vex::forward, PREP_PLACE_DISTANCE_MM - PLACE_DISTANCE_MM, vex::mm);
+  
+      // Lower elevator into box
+      elevator.setPositionMM(PLACE_CUP_HEIGHT_MM);
+  
+      // Drop cup
+      intake.setPositionRotations(CLAW_OPEN_ROTATIONS);
+  
+      // Back out from cup
+      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM);
+  
+      // Close claw
+      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS);
+  
+      // Drive backward slightly
+      drive.driveDistance(vex::reverse, PREP_PLACE_DISTANCE_MM, vex::mm);
+  
+      // Lower elevator to pickup oosition
+      elevator.setPositionMM(PICKUP_HEIGHT_MM);
     }
-    drive.stop();
-
-    // Close claw
-    intake.setPositionRotations(CLAW_CLOSED_ROTATIONS);
-
-    // Turn to boxes
-    drive.turnToAngle(vex::left, 90.0, vex::degrees);
-
-    // Drive until stack of boxes is in front of robot
-    while (distanceSensor.objectDistance(vex::inches) < PREP_PLACE_DISTANCE_MM) {
-      drive.drive(vex::forward, DRIVE_SPEED_RPM, vex::rpm);
-
-      wait(5, vex::msec);
-    }
-    drive.stop();
-
-    // Lift elevator to clearence level
-    elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM);
-
-    // Drive forward slightly
-    drive.driveDistance(vex::forward, PLACE_DISTANCE_MM, vex::mm);
-
-    // Lower elevator into box
-    elevator.setPositionMM(PLACE_CUP_HEIGHT_MM);
-
-    // Drop cup
-    intake.setPositionRotations(CLAW_OPEN_ROTATIONS);
-
-    // Close claw
-    intake.setPositionRotations(CLAW_CLOSED_ROTATIONS);
-
-    // Drive backward slightly
-    drive.driveDistance(vex::reverse, PREP_PLACE_DISTANCE_MM, vex::mm);
-
-    // Lower elevator to pickup oosition
-    elevator.setPositionMM(PICKUP_HEIGHT_MM);
   } else {
     // Run periodics which will call telemetry, useful to ensure data
     // reporting is good
@@ -138,6 +191,11 @@ int main() {
       // intake.periodic();
       elevator.printTelemetry();
       intake.printTelemetry();
+
+      lib::Telemetry::writeOutput(labelDistance, distanceSensor.objectDistance(vex::mm));
+      lib::Telemetry::writeOutput(labelColorRed, opticalSensor.getRgb().red);
+      lib::Telemetry::writeOutput(labelColorGreen, opticalSensor.getRgb().green);
+      lib::Telemetry::writeOutput(labelColorBlue, opticalSensor.getRgb().blue);
 
       wait(5, vex::msec);
     }
