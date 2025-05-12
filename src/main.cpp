@@ -32,7 +32,9 @@ vex::motor leftMotor(vex::PORT3, vex::gearSetting::ratio18_1, true);
 vex::motor rightMotor(vex::PORT4, vex::gearSetting::ratio18_1, false);
 vex::inertial inertialSensor(vex::PORT6);
 
-vex::optical opticalSensor(vex::PORT7);
+vex::optical topOpticalSensor(vex::PORT7);
+vex::optical leftOpticalSensor(vex::PORT8);
+vex::optical rightOpticalSensor(vex::PORT9);
 vex::distance distanceSensor(vex::PORT10);
 
 std::string elevatorName = "E";
@@ -49,8 +51,12 @@ const double DRIVE_SPEED_PCT = 20.0;
 
 const std::string ROW = "1"; // 1 or 2
 const std::string COLOR = "GREEN"; // GREEN, BLUE, or PINK
+const bool TARGET_SINGLE_COLOR = true;
 
-const vex::color DESIRED_COLOR = vex::color::blue;
+// TODO Get these constants
+const double SINGLE_COLOR_DISTANCE_MM = 1040.0 - 50.0;
+const std::array<double, 3> SINGLE_COLOR_TARGET = {1650.0, 1750.0, 1400.0};
+const double CENTER_BOARD_DISTANCE_MM = 550.0;
 
 // TODO Get these constants
 const double BOARD_COLOR_ROW_1_DISTANCE_MM = 1040.0; //1375.0;
@@ -101,7 +107,9 @@ int main() {
   wait(50, msec);
   Brain.Screen.clearScreen();
   // Turn on color sensor light
-  opticalSensor.setLight(vex::ledState::on);
+  topOpticalSensor.setLight(vex::ledState::on);
+  leftOpticalSensor.setLight(vex::ledState::on);
+  rightOpticalSensor.setLight(vex::ledState::on);
 
   // Instantiate subsystems
   subsystems::Drive drive(driveName, leftMotor, rightMotor, inertialSensor);
@@ -119,34 +127,39 @@ int main() {
       double initialDistanceMM = 0.0;
       std::array<double, 3> colorToSeek;
 
-      if (ROW == "1") {
-        initialDistanceMM = BOARD_COLOR_ROW_1_DISTANCE_MM;
-        if (COLOR == "GREEN") {
-          colorToSeek = COLOR_ROW_1_GREEN;
-        } else if (COLOR == "BLUE") {
-          colorToSeek = COLOR_ROW_1_BLUE;
-        } else if (COLOR == "PINK") {
-          colorToSeek = COLOR_ROW_1_PINK;
-        } else {
-          lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(1) SELECTION INVALID");
-          colorToSeek = COLOR_ROW_2_PINK;
-        }
-      } else if (ROW == "2") {
-        initialDistanceMM = BOARD_COLOR_ROW_2_DISTANCE_MM;
-        if (COLOR == "GREEN") {
-          colorToSeek = COLOR_ROW_2_GREEN;
-        } else if (COLOR == "BLUE") {
-          colorToSeek = COLOR_ROW_2_BLUE;
-        } else if (COLOR == "PINK") {
-          colorToSeek = COLOR_ROW_2_PINK;
-        } else {
-          lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(2) SELECTION INVALID");
-          colorToSeek = COLOR_ROW_2_PINK;
-        }
+      if (TARGET_SINGLE_COLOR) {
+        initialDistanceMM = SINGLE_COLOR_DISTANCE_MM;
+        colorToSeek = SINGLE_COLOR_TARGET;
       } else {
-        lib::Telemetry::writeOutput(systemName, "ERROR - ROW SELECTION INVALID");
-        initialDistanceMM = BOARD_COLOR_ROW_1_DISTANCE_MM;
-        colorToSeek = COLOR_ROW_2_PINK;
+        if (ROW == "1") {
+          initialDistanceMM = BOARD_COLOR_ROW_1_DISTANCE_MM;
+          if (COLOR == "GREEN") {
+            colorToSeek = COLOR_ROW_1_GREEN;
+          } else if (COLOR == "BLUE") {
+            colorToSeek = COLOR_ROW_1_BLUE;
+          } else if (COLOR == "PINK") {
+            colorToSeek = COLOR_ROW_1_PINK;
+          } else {
+            lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(1) SELECTION INVALID");
+            colorToSeek = COLOR_ROW_2_PINK;
+          }
+        } else if (ROW == "2") {
+          initialDistanceMM = BOARD_COLOR_ROW_2_DISTANCE_MM;
+          if (COLOR == "GREEN") {
+            colorToSeek = COLOR_ROW_2_GREEN;
+          } else if (COLOR == "BLUE") {
+            colorToSeek = COLOR_ROW_2_BLUE;
+          } else if (COLOR == "PINK") {
+            colorToSeek = COLOR_ROW_2_PINK;
+          } else {
+            lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(2) SELECTION INVALID");
+            colorToSeek = COLOR_ROW_2_PINK;
+          }
+        } else {
+          lib::Telemetry::writeOutput(systemName, "ERROR - ROW SELECTION INVALID");
+          initialDistanceMM = BOARD_COLOR_ROW_1_DISTANCE_MM;
+          colorToSeek = COLOR_ROW_2_PINK;
+        }
       }
 
       // Raise claw to be out of way
@@ -162,27 +175,46 @@ int main() {
       // Turn left 90 deg
       drive.turnToAngle(vex::left, 90.0, vex::degrees);
 
-      // Drive until on correct color row
-      while (
-        !(opticalSensor.getRgb().red >= colorToSeek[0]) and
-        !(opticalSensor.getRgb().green >= colorToSeek[1]) and
-        !(opticalSensor.getRgb().blue >= colorToSeek[2])
-      ) {
-        Brain.Screen.print(opticalSensor.getRgb().red);
-        Brain.Screen.newLine();
-        Brain.Screen.print(opticalSensor.getRgb().green);
-        Brain.Screen.newLine();
-        Brain.Screen.print(opticalSensor.getRgb().blue);
-        Brain.Screen.newLine();
-        Brain.Screen.setCursor(1, 1);
+      // Drive until on correct color
+      if (TARGET_SINGLE_COLOR) {
+        while (
+          !(topOpticalSensor.getRgb().red >= colorToSeek[0]) and
+          !(topOpticalSensor.getRgb().green >= colorToSeek[1]) and
+          !(topOpticalSensor.getRgb().blue >= colorToSeek[2])
+        ) {
+          Brain.Screen.print(topOpticalSensor.getRgb().red);
+          Brain.Screen.newLine();
+          Brain.Screen.print(topOpticalSensor.getRgb().green);
+          Brain.Screen.newLine();
+          Brain.Screen.print(topOpticalSensor.getRgb().blue);
+          Brain.Screen.newLine();
+          Brain.Screen.setCursor(1, 1);
+  
+          drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+        }
+        drive.stop();
+        wait(1, vex::sec);
 
-        drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+        drive.driveDistance(vex::forward, CENTER_BOARD_DISTANCE_MM, vex::mm);
+      } else {
+        while (
+          !(topOpticalSensor.getRgb().red >= colorToSeek[0]) and
+          !(topOpticalSensor.getRgb().green >= colorToSeek[1]) and
+          !(topOpticalSensor.getRgb().blue >= colorToSeek[2])
+        ) {
+          Brain.Screen.print(topOpticalSensor.getRgb().red);
+          Brain.Screen.newLine();
+          Brain.Screen.print(topOpticalSensor.getRgb().green);
+          Brain.Screen.newLine();
+          Brain.Screen.print(topOpticalSensor.getRgb().blue);
+          Brain.Screen.newLine();
+          Brain.Screen.setCursor(1, 1);
+  
+          drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+        }
+        drive.stop();
+        wait(1, vex::sec);
       }
-      // while (opticalSensor.color() != DESIRED_COLOR) {
-      //   drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-      // }
-      drive.stop();
-      wait(1, vex::sec);
 
       // Turn left 90 deg
       drive.turnToAngle(vex::left, 90.0, vex::degrees);
@@ -194,12 +226,23 @@ int main() {
       elevator.setPositionMM(PICKUP_HEIGHT_MM);
 
       // Drive until in front of cup
-      while (distanceSensor.objectDistance(vex::mm) > PICKUP_DISTANCE_MM) {
-        Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
-        Brain.Screen.newLine();
-        Brain.Screen.setCursor(1, 1);
-        
-        drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+      if (TARGET_SINGLE_COLOR) {
+        while (distanceSensor.objectDistance(vex::mm) > PICKUP_DISTANCE_MM) {
+          // TODO Replace with line following logic
+          Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
+          Brain.Screen.newLine();
+          Brain.Screen.setCursor(1, 1);
+          
+          drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+        }
+      } else {
+        while (distanceSensor.objectDistance(vex::mm) > PICKUP_DISTANCE_MM) {
+          Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
+          Brain.Screen.newLine();
+          Brain.Screen.setCursor(1, 1);
+          
+          drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+        }
       }
       drive.stop();
       wait(1, vex::sec);
@@ -307,15 +350,15 @@ int main() {
       intake.printTelemetry();
 
       lib::Telemetry::writeOutput(labelDistance, distanceSensor.objectDistance(vex::mm));
-      lib::Telemetry::writeOutput(labelColorRed, opticalSensor.getRgb().red);
-      lib::Telemetry::writeOutput(labelColorGreen, opticalSensor.getRgb().green);
-      lib::Telemetry::writeOutput(labelColorBlue, opticalSensor.getRgb().blue);
+      lib::Telemetry::writeOutput(labelColorRed, topOpticalSensor.getRgb().red);
+      lib::Telemetry::writeOutput(labelColorGreen, topOpticalSensor.getRgb().green);
+      lib::Telemetry::writeOutput(labelColorBlue, topOpticalSensor.getRgb().blue);
 
-      Brain.Screen.print(opticalSensor.getRgb().red);
+      Brain.Screen.print(topOpticalSensor.getRgb().red);
       Brain.Screen.newLine();
-      Brain.Screen.print(opticalSensor.getRgb().green);
+      Brain.Screen.print(topOpticalSensor.getRgb().green);
       Brain.Screen.newLine();
-      Brain.Screen.print(opticalSensor.getRgb().blue);
+      Brain.Screen.print(topOpticalSensor.getRgb().blue);
       Brain.Screen.newLine();
       Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
       Brain.Screen.newLine();
