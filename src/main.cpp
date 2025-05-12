@@ -22,6 +22,10 @@ using code = vision::code;
 vex::brain Brain;
 
 std::string systemName = "S";
+// Set to true before running graded performance
+const bool RUN_AUTONOMOUS = true;
+// Set to true before running the graded auto
+const bool RUN_MAIN_AUTO = true;
 
 std::string driveName = "D";
 vex::motor leftMotor(vex::PORT3, vex::gearSetting::ratio18_1, true);
@@ -44,26 +48,26 @@ vex::digital_in surfaceLimitSwitch(Brain.ThreeWirePort.D);
 const double DRIVE_SPEED_PCT = 20.0;
 
 const std::string ROW = "1"; // 1 or 2
-const std::string COLOR = "BLUE"; // GREEN, BLUE, or PINK
+const std::string COLOR = "GREEN"; // GREEN, BLUE, or PINK
 
 const vex::color DESIRED_COLOR = vex::color::blue;
 
 // TODO Get these constants
-const double BOARD_COLOR_ROW_1_DISTANCE_MM = 1375.0;
-const double BOARD_COLOR_ROW_2_DISTANCE_MM = 950.0;
+const double BOARD_COLOR_ROW_1_DISTANCE_MM = 1040.0; //1375.0;
+const double BOARD_COLOR_ROW_2_DISTANCE_MM = 700.0; // 950.0;
 
 // TODO Get these constants
-const std::array<double, 3> COLOR_ROW_1_GREEN = {0.0, 0.0, 0.0};
-const std::array<double, 3> COLOR_ROW_1_BLUE = {0.0, 0.0, 0.0};
-const std::array<double, 3> COLOR_ROW_1_PINK = {0.0, 0.0, 0.0};
+const std::array<double, 3> COLOR_ROW_1_GREEN = {6600.0, 4950.0, 3380.0};
+const std::array<double, 3> COLOR_ROW_1_BLUE = {2600.0, 2750.0, 3300.0};
+const std::array<double, 3> COLOR_ROW_1_PINK = {7500.0, 1750.0, 3500.0};
 
 // TODO Get these constants
-const std::array<double, 3> COLOR_ROW_2_GREEN = {0.0, 0.0, 0.0};
-const std::array<double, 3> COLOR_ROW_2_BLUE = {0.0, 0.0, 0.0};
-const std::array<double, 3> COLOR_ROW_2_PINK = {0.0, 0.0, 0.0};
+const std::array<double, 3> COLOR_ROW_2_GREEN = {1650.0, 1750.0, 1400.0};
+const std::array<double, 3> COLOR_ROW_2_BLUE = {5550.0, 4700.0, 5300.0};
+const std::array<double, 3> COLOR_ROW_2_PINK = {7300.0, 1700.0, 2910.0};
 
 const double PICKUP_DISTANCE_MM = 77.0;
-const double PREP_PLACE_DISTANCE_MM = 200.0;
+const double PREP_PLACE_DISTANCE_MM = 250.0;
 const double PLACE_DISTANCE_MM = 17.0;
 
 const double PICKUP_HEIGHT_MM = 0.0;
@@ -71,13 +75,8 @@ const double CLEAR_TOP_BOX_HEIGHT_MM = 582.706;
 const double PLACE_CUP_HEIGHT_MM = 450.0;
 const double STOW_ELEVATOR_MM = 150.0;
 
-const double CLAW_OPEN_ROTATIONS = 0.7;
+const double CLAW_OPEN_ROTATIONS = 0.8;
 const double CLAW_CLOSED_ROTATIONS = 0.31;
-
-// Set to true before running graded performance
-const bool RUN_AUTONOMOUS = true;
-// Set to true before running the graded auto
-const bool RUN_MAIN_AUTO = true;
 
 std::string labelDistance = "distance";
 std::string labelColorRed = "colorRed";
@@ -130,6 +129,7 @@ int main() {
           colorToSeek = COLOR_ROW_1_PINK;
         } else {
           lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(1) SELECTION INVALID");
+          colorToSeek = COLOR_ROW_2_PINK;
         }
       } else if (ROW == "2") {
         initialDistanceMM = BOARD_COLOR_ROW_2_DISTANCE_MM;
@@ -141,10 +141,16 @@ int main() {
           colorToSeek = COLOR_ROW_2_PINK;
         } else {
           lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(2) SELECTION INVALID");
+          colorToSeek = COLOR_ROW_2_PINK;
         }
       } else {
         lib::Telemetry::writeOutput(systemName, "ERROR - ROW SELECTION INVALID");
+        initialDistanceMM = BOARD_COLOR_ROW_1_DISTANCE_MM;
+        colorToSeek = COLOR_ROW_2_PINK;
       }
+
+      // Raise claw to be out of way
+      elevator.setPositionMM(STOW_ELEVATOR_MM);
 
       // Drive until on side of color row
       while (distanceSensor.objectDistance(vex::mm) > initialDistanceMM) {
@@ -157,16 +163,24 @@ int main() {
       drive.turnToAngle(vex::left, 90.0, vex::degrees);
 
       // Drive until on correct color row
-      // while (
-      //   opticalSensor.getRgb().red != colorToSeek[0] and
-      //   opticalSensor.getRgb().green != colorToSeek[1] and
-      //   opticalSensor.getRgb().blue != colorToSeek[2]
-      // ) {
-      //   drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-      // }
-      while (opticalSensor.color() != DESIRED_COLOR) {
+      while (
+        !(opticalSensor.getRgb().red >= colorToSeek[0]) and
+        !(opticalSensor.getRgb().green >= colorToSeek[1]) and
+        !(opticalSensor.getRgb().blue >= colorToSeek[2])
+      ) {
+        Brain.Screen.print(opticalSensor.getRgb().red);
+        Brain.Screen.newLine();
+        Brain.Screen.print(opticalSensor.getRgb().green);
+        Brain.Screen.newLine();
+        Brain.Screen.print(opticalSensor.getRgb().blue);
+        Brain.Screen.newLine();
+        Brain.Screen.setCursor(1, 1);
+
         drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
       }
+      // while (opticalSensor.color() != DESIRED_COLOR) {
+      //   drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+      // }
       drive.stop();
       wait(1, vex::sec);
 
@@ -181,6 +195,10 @@ int main() {
 
       // Drive until in front of cup
       while (distanceSensor.objectDistance(vex::mm) > PICKUP_DISTANCE_MM) {
+        Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
+        Brain.Screen.newLine();
+        Brain.Screen.setCursor(1, 1);
+        
         drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
       }
       drive.stop();
@@ -292,6 +310,16 @@ int main() {
       lib::Telemetry::writeOutput(labelColorRed, opticalSensor.getRgb().red);
       lib::Telemetry::writeOutput(labelColorGreen, opticalSensor.getRgb().green);
       lib::Telemetry::writeOutput(labelColorBlue, opticalSensor.getRgb().blue);
+
+      Brain.Screen.print(opticalSensor.getRgb().red);
+      Brain.Screen.newLine();
+      Brain.Screen.print(opticalSensor.getRgb().green);
+      Brain.Screen.newLine();
+      Brain.Screen.print(opticalSensor.getRgb().blue);
+      Brain.Screen.newLine();
+      Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
+      Brain.Screen.newLine();
+      Brain.Screen.setCursor(1, 1);
 
       wait(5, vex::msec);
     }
