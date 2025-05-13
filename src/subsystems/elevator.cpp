@@ -40,17 +40,22 @@ namespace subsystems {
   void Elevator::setPositionMM(double targetHeightMM) {
     heightSetpointMM = targetHeightMM;
 
-    if (atUpperBound() && motor.direction() == vex::forward) {
-      stop();
-    } else if (atLowerBound() && motor.direction() == vex::reverse) {
-      stop();
-    } else {
-      double rotationSetpointDegrees = mmToDegrees(heightSetpointMM);
+    // if (atUpperBound() && motor.direction() == vex::forward) {
+    //   stop();
+    // } else if (atLowerBound() && motor.direction() == vex::reverse) {
+    //   stop();
+    // } else {
+    //   double rotationSetpointDegrees = mmToDegrees(heightSetpointMM);
 
-      // NOTE the robot program will cease until this action is completed,
-      // may need to remove later if blocking becomes an issue
-      motor.spinToPosition(rotationSetpointDegrees, vex::degrees, true);
-    }
+    //   // NOTE the robot program will cease until this action is completed,
+    //   // may need to remove later if blocking becomes an issue
+    //   motor.spinToPosition(rotationSetpointDegrees, vex::degrees, true);
+    // }
+    double rotationSetpointDegrees = mmToDegrees(heightSetpointMM);
+
+    // NOTE the robot program will cease until this action is completed,
+    // may need to remove later if blocking becomes an issue
+    motor.spinToPosition(rotationSetpointDegrees, vex::degrees, true);
   }
 
   void Elevator::setVoltage(vex::directionType direction, double voltage) {

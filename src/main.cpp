@@ -54,9 +54,11 @@ const std::string COLOR = "GREEN"; // GREEN, BLUE, or PINK
 const bool TARGET_SINGLE_COLOR = true;
 
 // TODO Get these constants
-const double SINGLE_COLOR_DISTANCE_MM = 1040.0 - 50.0;
+const double SINGLE_COLOR_DISTANCE_MM = 320.0;
 const std::array<double, 3> SINGLE_COLOR_TARGET = {1650.0, 1750.0, 1400.0};
+const std::array<double, 3> WHITE_COLOR = {6700.0, 4300.0, 4700.0};
 const double CENTER_BOARD_DISTANCE_MM = 550.0;
+const double DOOR_DISTANCE_MM = 2580.0;
 
 // TODO Get these constants
 const double BOARD_COLOR_ROW_1_DISTANCE_MM = 1040.0; //1375.0;
@@ -177,19 +179,26 @@ int main() {
 
       // Drive until on correct color
       if (TARGET_SINGLE_COLOR) {
-        while (
-          !(topOpticalSensor.getRgb().red >= colorToSeek[0]) and
-          !(topOpticalSensor.getRgb().green >= colorToSeek[1]) and
-          !(topOpticalSensor.getRgb().blue >= colorToSeek[2])
-        ) {
-          Brain.Screen.print(topOpticalSensor.getRgb().red);
-          Brain.Screen.newLine();
-          Brain.Screen.print(topOpticalSensor.getRgb().green);
-          Brain.Screen.newLine();
-          Brain.Screen.print(topOpticalSensor.getRgb().blue);
+        // while (
+        //   !(topOpticalSensor.getRgb().red >= colorToSeek[0]) and
+        //   !(topOpticalSensor.getRgb().green >= colorToSeek[1]) and
+        //   !(topOpticalSensor.getRgb().blue >= colorToSeek[2])
+        // ) {
+        //   Brain.Screen.print(topOpticalSensor.getRgb().red);
+        //   Brain.Screen.newLine();
+        //   Brain.Screen.print(topOpticalSensor.getRgb().green);
+        //   Brain.Screen.newLine();
+        //   Brain.Screen.print(topOpticalSensor.getRgb().blue);
+        //   Brain.Screen.newLine();
+        //   Brain.Screen.setCursor(1, 1);
+  
+        //   drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+        // }
+        while (distanceSensor.objectDistance(vex::mm) > DOOR_DISTANCE_MM) {
+          Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
           Brain.Screen.newLine();
           Brain.Screen.setCursor(1, 1);
-  
+
           drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
         }
         drive.stop();
