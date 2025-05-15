@@ -46,6 +46,7 @@ namespace subsystems {
 
   void Drive::driveDistance(vex::directionType direction, double distance, 
     vex::distanceUnits units) {
+    robotDrive.setDriveVelocity(30.0, vex::pct);
     robotDrive.driveFor(direction, distance, units, true);
   }
 

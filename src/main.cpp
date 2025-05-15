@@ -54,7 +54,7 @@ const std::string COLOR = "GREEN"; // GREEN, BLUE, or PINK
 const bool TARGET_SINGLE_COLOR = true;
 
 // TODO Get these constants
-const double SINGLE_COLOR_DISTANCE_MM = 320.0;
+const double SINGLE_COLOR_DISTANCE_MM = 1040; // 320.0;
 const std::array<double, 3> SINGLE_COLOR_TARGET = {1650.0, 1750.0, 1400.0};
 const std::array<double, 3> WHITE_COLOR = {6700.0, 4300.0, 4700.0};
 const double CENTER_BOARD_DISTANCE_MM = 550.0;
@@ -129,64 +129,78 @@ int main() {
       double initialDistanceMM = 0.0;
       std::array<double, 3> colorToSeek;
 
-      if (TARGET_SINGLE_COLOR) {
-        initialDistanceMM = SINGLE_COLOR_DISTANCE_MM;
-        colorToSeek = SINGLE_COLOR_TARGET;
-      } else {
-        if (ROW == "1") {
-          initialDistanceMM = BOARD_COLOR_ROW_1_DISTANCE_MM;
-          if (COLOR == "GREEN") {
-            colorToSeek = COLOR_ROW_1_GREEN;
-          } else if (COLOR == "BLUE") {
-            colorToSeek = COLOR_ROW_1_BLUE;
-          } else if (COLOR == "PINK") {
-            colorToSeek = COLOR_ROW_1_PINK;
-          } else {
-            lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(1) SELECTION INVALID");
-            colorToSeek = COLOR_ROW_2_PINK;
-          }
-        } else if (ROW == "2") {
-          initialDistanceMM = BOARD_COLOR_ROW_2_DISTANCE_MM;
-          if (COLOR == "GREEN") {
-            colorToSeek = COLOR_ROW_2_GREEN;
-          } else if (COLOR == "BLUE") {
-            colorToSeek = COLOR_ROW_2_BLUE;
-          } else if (COLOR == "PINK") {
-            colorToSeek = COLOR_ROW_2_PINK;
-          } else {
-            lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(2) SELECTION INVALID");
-            colorToSeek = COLOR_ROW_2_PINK;
-          }
-        } else {
-          lib::Telemetry::writeOutput(systemName, "ERROR - ROW SELECTION INVALID");
-          initialDistanceMM = BOARD_COLOR_ROW_1_DISTANCE_MM;
-          colorToSeek = COLOR_ROW_2_PINK;
-        }
-      }
+      initialDistanceMM = SINGLE_COLOR_DISTANCE_MM;
+      colorToSeek = SINGLE_COLOR_TARGET;
+
+      // if (TARGET_SINGLE_COLOR) {
+      //   initialDistanceMM = SINGLE_COLOR_DISTANCE_MM;
+      //   colorToSeek = SINGLE_COLOR_TARGET;
+      // } else {
+      //   if (ROW == "1") {
+      //     initialDistanceMM = BOARD_COLOR_ROW_1_DISTANCE_MM;
+      //     if (COLOR == "GREEN") {
+      //       colorToSeek = COLOR_ROW_1_GREEN;
+      //     } else if (COLOR == "BLUE") {
+      //       colorToSeek = COLOR_ROW_1_BLUE;
+      //     } else if (COLOR == "PINK") {
+      //       colorToSeek = COLOR_ROW_1_PINK;
+      //     } else {
+      //       lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(1) SELECTION INVALID");
+      //       colorToSeek = COLOR_ROW_2_PINK;
+      //     }
+      //   } else if (ROW == "2") {
+      //     initialDistanceMM = BOARD_COLOR_ROW_2_DISTANCE_MM;
+      //     if (COLOR == "GREEN") {
+      //       colorToSeek = COLOR_ROW_2_GREEN;
+      //     } else if (COLOR == "BLUE") {
+      //       colorToSeek = COLOR_ROW_2_BLUE;
+      //     } else if (COLOR == "PINK") {
+      //       colorToSeek = COLOR_ROW_2_PINK;
+      //     } else {
+      //       lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(2) SELECTION INVALID");
+      //       colorToSeek = COLOR_ROW_2_PINK;
+      //     }
+      //   } else {
+      //     lib::Telemetry::writeOutput(systemName, "ERROR - ROW SELECTION INVALID");
+      //     initialDistanceMM = BOARD_COLOR_ROW_1_DISTANCE_MM;
+      //     colorToSeek = COLOR_ROW_2_PINK;
+      //   }
+      // }
 
       // Raise claw to be out of way
       elevator.setPositionMM(STOW_ELEVATOR_MM);
 
       // Drive until on side of color row
-      while (distanceSensor.objectDistance(vex::mm) > initialDistanceMM) {
-        drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-      }
-      drive.stop();
-      wait(1, vex::sec);
+      // while (distanceSensor.objectDistance(vex::mm) > initialDistanceMM) {
+      //   Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
+      //   Brain.Screen.newLine();
+      //   Brain.Screen.setCursor(1, 1);
+
+      //   drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+
+      //   wait(5, vex::msec);
+      // }
+      // drive.stop();
+      // wait(1, vex::sec);
+      drive.driveDistance(vex::forward, 4800.0, vex::mm);
 
       // Turn left 90 deg
       drive.turnToAngle(vex::left, 90.0, vex::degrees);
 
       // Drive until on correct color
-      while (distanceSensor.objectDistance(vex::mm) > DOOR_DISTANCE_MM) {
-        Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
-        Brain.Screen.newLine();
-        Brain.Screen.setCursor(1, 1);
+      // while (distanceSensor.objectDistance(vex::mm) > DOOR_DISTANCE_MM) {
+      //   // Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
+      //   // Brain.Screen.newLine();
+      //   // Brain.Screen.setCursor(1, 1);
 
-        drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-      }
-      drive.stop();
-      wait(1, vex::sec);
+      //   drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+
+      //   wait(5, vex::msec);
+      // }
+      // drive.stop();
+      // wait(1, vex::sec);
+      // drive.driveDistance(vex::forward, 5000.0, vex::mm);
+      drive.driveDistance(vex::forward, 4600.0, vex::mm);
 
       // if (TARGET_SINGLE_COLOR) {
       //   // while (
@@ -267,6 +281,8 @@ int main() {
           Brain.Screen.setCursor(1, 1);
           
           drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+
+          wait(5, vex::msec);
         }
       } else {
         while (distanceSensor.objectDistance(vex::mm) > PICKUP_DISTANCE_MM) {
@@ -275,6 +291,8 @@ int main() {
           Brain.Screen.setCursor(1, 1);
           
           drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+
+          wait(5, vex::msec);
         }
       }
       drive.stop();
