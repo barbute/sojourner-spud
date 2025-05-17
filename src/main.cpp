@@ -106,6 +106,7 @@ void prepPickup() {
 void runPickup() {
   prepPickup();
 
+  // Run until senses cup
   while (distanceSensor.objectDistance(vex::mm) > PICKUP_DISTANCE_MM) {
     // TODO Replace with line following logic
     Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
@@ -206,79 +207,14 @@ int main() {
       // Turn left 90 deg
       drive.turnToAngle(vex::left, 90.0, vex::degrees, true);
 
-      // Claw pre open
-      intake.setPositionRotations(CLAW_OPEN_ROTATIONS, true);
-
-      // Elevator to pickup position
-      elevator.setPositionMM(PICKUP_HEIGHT_MM, true);
-
-      // Drive until in front of cup
-      if (TARGET_SINGLE_COLOR) {
-        while (distanceSensor.objectDistance(vex::mm) > PICKUP_DISTANCE_MM) {
-          // TODO Replace with line following logic
-          Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
-          Brain.Screen.newLine();
-          Brain.Screen.setCursor(1, 1);
-          
-          drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-
-          wait(5, vex::msec);
-        }
-      } else {
-        while (distanceSensor.objectDistance(vex::mm) > PICKUP_DISTANCE_MM) {
-          Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
-          Brain.Screen.newLine();
-          Brain.Screen.setCursor(1, 1);
-          
-          drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-
-          wait(5, vex::msec);
-        }
-      }
-      drive.stop();
-      wait(1, vex::sec);
-
-      // Claw close
-      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS, true);
-
-      // Elevator to stow cup
-      elevator.setPositionMM(STOW_ELEVATOR_MM, true);
+      // Run to pickup the cup
+      runPickup();
 
       // Turn left 90 deg
       drive.turnToAngle(vex::left, 90.0, vex::degrees, true);
 
-      // Drive to prep placing position
-      while (distanceSensor.objectDistance(vex::mm) > PREP_PLACE_DISTANCE_MM) {
-        drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-  
-        wait(5, vex::msec);
-      }
-      drive.stop();
-
-      // Elevator raised to clearence
-      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM, true);
-
-      // Drive to place position
-      drive.driveDistance(vex::forward, PREP_PLACE_DISTANCE_MM - PLACE_DISTANCE_MM, 
-        vex::mm, true);
-
-      // Elevator lower to place
-      elevator.setPositionMM(PLACE_CUP_HEIGHT_MM, true);
-
-      // Claw open
-      intake.setPositionRotations(CLAW_OPEN_ROTATIONS, true);
-
-      // Elevator raise to clearence
-      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM, true);
-
-      // Claw close
-      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS, true);
-
-      // Drive backwards
-      drive.driveDistance(vex::reverse, PREP_PLACE_DISTANCE_MM, vex::mm, true);
-
-      // Elevator lower to pickup
-      elevator.setPositionMM(PICKUP_HEIGHT_MM, true);
+      // Score cup
+      runAutoPlace();
     } else {
       // Prep Open claw
       intake.setPositionRotations(CLAW_OPEN_ROTATIONS, true);
