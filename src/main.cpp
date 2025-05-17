@@ -182,10 +182,6 @@ int main() {
   leftOpticalSensor.setLight(vex::ledState::on);
   rightOpticalSensor.setLight(vex::ledState::on);
 
-  // NOTE Actions are waiting/blocking by default, meaning the code program
-  // will wait for that action to complete before moveing on, thus why all
-  // actions below can be ordered sequentially with little transition or
-  // scheduling logic
   if (RUN_AUTONOMOUS) {
     if (RUN_MAIN_AUTO) {
       // Grab constants based on where the robot is running
@@ -393,6 +389,8 @@ int main() {
             elevator.stop();
           }
         }
+
+        wait(5, vex::msec);
       }
     }
   }
