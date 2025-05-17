@@ -56,23 +56,19 @@ const std::string ROW = "1"; // 1 or 2
 const std::string COLOR = "GREEN"; // GREEN, BLUE, or PINK
 const bool TARGET_SINGLE_COLOR = true;
 
-// TODO Get these constants
 const double SINGLE_COLOR_DISTANCE_MM = 1040; // 320.0;
 const std::array<double, 3> SINGLE_COLOR_TARGET = {1650.0, 1750.0, 1400.0};
 const std::array<double, 3> WHITE_COLOR = {6700.0, 4300.0, 4700.0};
 const double CENTER_BOARD_DISTANCE_MM = 550.0;
 const double DOOR_DISTANCE_MM = 2480.0;
 
-// TODO Get these constants
 const double BOARD_COLOR_ROW_1_DISTANCE_MM = 1040.0; //1375.0;
 const double BOARD_COLOR_ROW_2_DISTANCE_MM = 700.0; // 950.0;
 
-// TODO Get these constants
 const std::array<double, 3> COLOR_ROW_1_GREEN = {6600.0, 4950.0, 3380.0};
 const std::array<double, 3> COLOR_ROW_1_BLUE = {2600.0, 2750.0, 3300.0};
 const std::array<double, 3> COLOR_ROW_1_PINK = {7500.0, 1750.0, 3500.0};
 
-// TODO Get these constants
 const std::array<double, 3> COLOR_ROW_2_GREEN = {1650.0, 1750.0, 1400.0};
 const std::array<double, 3> COLOR_ROW_2_BLUE = {5550.0, 4700.0, 5300.0};
 const std::array<double, 3> COLOR_ROW_2_PINK = {7300.0, 1700.0, 2910.0};
@@ -199,136 +195,17 @@ int main() {
       initialDistanceMM = SINGLE_COLOR_DISTANCE_MM;
       colorToSeek = SINGLE_COLOR_TARGET;
 
-      // if (TARGET_SINGLE_COLOR) {
-      //   initialDistanceMM = SINGLE_COLOR_DISTANCE_MM;
-      //   colorToSeek = SINGLE_COLOR_TARGET;
-      // } else {
-      //   if (ROW == "1") {
-      //     initialDistanceMM = BOARD_COLOR_ROW_1_DISTANCE_MM;
-      //     if (COLOR == "GREEN") {
-      //       colorToSeek = COLOR_ROW_1_GREEN;
-      //     } else if (COLOR == "BLUE") {
-      //       colorToSeek = COLOR_ROW_1_BLUE;
-      //     } else if (COLOR == "PINK") {
-      //       colorToSeek = COLOR_ROW_1_PINK;
-      //     } else {
-      //       lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(1) SELECTION INVALID");
-      //       colorToSeek = COLOR_ROW_2_PINK;
-      //     }
-      //   } else if (ROW == "2") {
-      //     initialDistanceMM = BOARD_COLOR_ROW_2_DISTANCE_MM;
-      //     if (COLOR == "GREEN") {
-      //       colorToSeek = COLOR_ROW_2_GREEN;
-      //     } else if (COLOR == "BLUE") {
-      //       colorToSeek = COLOR_ROW_2_BLUE;
-      //     } else if (COLOR == "PINK") {
-      //       colorToSeek = COLOR_ROW_2_PINK;
-      //     } else {
-      //       lib::Telemetry::writeOutput(systemName, "ERROR - COLOR(2) SELECTION INVALID");
-      //       colorToSeek = COLOR_ROW_2_PINK;
-      //     }
-      //   } else {
-      //     lib::Telemetry::writeOutput(systemName, "ERROR - ROW SELECTION INVALID");
-      //     initialDistanceMM = BOARD_COLOR_ROW_1_DISTANCE_MM;
-      //     colorToSeek = COLOR_ROW_2_PINK;
-      //   }
-      // }
-
       // Raise claw to be out of way
       elevator.setPositionMM(STOW_ELEVATOR_MM, true);
 
       // Drive until on side of color row
-      // while (distanceSensor.objectDistance(vex::mm) > initialDistanceMM) {
-      //   Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
-      //   Brain.Screen.newLine();
-      //   Brain.Screen.setCursor(1, 1);
-
-      //   drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-
-      //   wait(5, vex::msec);
-      // }
-      // drive.stop();
-      // wait(1, vex::sec);
       drive.driveDistance(vex::forward, 4800.0, vex::mm, true);
 
       // Turn left 90 deg
       drive.turnToAngle(vex::left, 90.0, vex::degrees, true);
 
-      // Drive until on correct color
-      // while (distanceSensor.objectDistance(vex::mm) > DOOR_DISTANCE_MM) {
-      //   // Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
-      //   // Brain.Screen.newLine();
-      //   // Brain.Screen.setCursor(1, 1);
-
-      //   drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-
-      //   wait(5, vex::msec);
-      // }
-      // drive.stop();
-      // wait(1, vex::sec);
-      // drive.driveDistance(vex::forward, 5000.0, vex::mm);
+      // Drive until on correct pad
       drive.driveDistance(vex::forward, 4600.0, vex::mm, true);
-
-      // if (TARGET_SINGLE_COLOR) {
-      //   // while (
-      //   //   !(topOpticalSensor.getRgb().red >= colorToSeek[0]) and
-      //   //   !(topOpticalSensor.getRgb().green >= colorToSeek[1]) and
-      //   //   !(topOpticalSensor.getRgb().blue >= colorToSeek[2])
-      //   // ) {
-      //   //   Brain.Screen.print(topOpticalSensor.getRgb().red);
-      //   //   Brain.Screen.newLine();
-      //   //   Brain.Screen.print(topOpticalSensor.getRgb().green);
-      //   //   Brain.Screen.newLine();
-      //   //   Brain.Screen.print(topOpticalSensor.getRgb().blue);
-      //   //   Brain.Screen.newLine();
-      //   //   Brain.Screen.setCursor(1, 1);
-  
-      //   //   drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-      //   // }
-      //   while (distanceSensor.objectDistance(vex::mm) > DOOR_DISTANCE_MM) {
-      //     Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
-      //     Brain.Screen.newLine();
-      //     Brain.Screen.setCursor(1, 1);
-
-      //     drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-      //   }
-      //   Brain.Screen.print("LOOP ONE COMPLETE");
-      //   Brain.Screen.newLine();
-      //   Brain.Screen.setCursor(1, 1);
-
-      //   drive.stop();
-      //   wait(5, vex::sec);
-      //   // Redundant while loop in case the distance sensor jumps
-      //   while (distanceSensor.objectDistance(vex::mm) > DOOR_DISTANCE_MM) {
-      //     Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
-      //     Brain.Screen.newLine();
-      //     Brain.Screen.setCursor(1, 1);
-
-      //     drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-      //   }
-      //   drive.stop();
-      //   wait(1, vex::sec);
-
-      //   drive.driveDistance(vex::forward, CENTER_BOARD_DISTANCE_MM, vex::mm);
-      // } else {
-      //   while (
-      //     !(topOpticalSensor.getRgb().red >= colorToSeek[0]) and
-      //     !(topOpticalSensor.getRgb().green >= colorToSeek[1]) and
-      //     !(topOpticalSensor.getRgb().blue >= colorToSeek[2])
-      //   ) {
-      //     Brain.Screen.print(topOpticalSensor.getRgb().red);
-      //     Brain.Screen.newLine();
-      //     Brain.Screen.print(topOpticalSensor.getRgb().green);
-      //     Brain.Screen.newLine();
-      //     Brain.Screen.print(topOpticalSensor.getRgb().blue);
-      //     Brain.Screen.newLine();
-      //     Brain.Screen.setCursor(1, 1);
-  
-      //     drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
-      //   }
-      //   drive.stop();
-      //   wait(1, vex::sec);
-      // }
 
       // Turn left 90 deg
       drive.turnToAngle(vex::left, 90.0, vex::degrees, true);
@@ -484,7 +361,6 @@ int main() {
       }
     } else {
       while (true) {
-        // pilotController.ButtonY.pressed(runPickup);
         if (pilotController.ButtonY.pressing()) {
           runAutoPlace();
         } else if (pilotController.ButtonA.pressing()) {
