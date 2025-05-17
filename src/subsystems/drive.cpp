@@ -45,16 +45,16 @@ namespace subsystems {
   }
 
   void Drive::driveDistance(vex::directionType direction, double distance, 
-    vex::distanceUnits units) {
+    vex::distanceUnits units, bool blocking) {
     robotDrive.setDriveVelocity(30.0, vex::pct);
-    robotDrive.driveFor(direction, distance, units, true);
+    robotDrive.driveFor(direction, distance, units, blocking);
   }
 
   void Drive::turnToAngle(
     vex::turnType direction, double angle,
-    vex::rotationUnits units) 
+    vex::rotationUnits units, bool blocking) 
   {
-    robotDrive.turnFor(direction, angle, units, true);
+    robotDrive.turnFor(direction, angle, units, blocking);
   }
 
   double Drive::getHeadingDegrees() { 

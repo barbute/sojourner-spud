@@ -20,12 +20,15 @@ using signature = vision::signature;
 using code = vision::code;
 
 vex::brain Brain;
+vex::controller pilotController;
 
 std::string systemName = "S";
 // Set to true before running graded performance
-const bool RUN_AUTONOMOUS = true;
+const bool RUN_AUTONOMOUS = false;
 // Set to true before running the graded auto
 const bool RUN_MAIN_AUTO = true;
+// Set to false before running teleop
+const bool RUN_CALIBRATION_MODE = false;
 
 std::string driveName = "D";
 vex::motor leftMotor(vex::PORT3, vex::gearSetting::ratio18_1, true);
@@ -75,12 +78,12 @@ const std::array<double, 3> COLOR_ROW_2_BLUE = {5550.0, 4700.0, 5300.0};
 const std::array<double, 3> COLOR_ROW_2_PINK = {7300.0, 1700.0, 2910.0};
 
 const double PICKUP_DISTANCE_MM = 77.0;
-const double PREP_PLACE_DISTANCE_MM = 250.0;
+const double PREP_PLACE_DISTANCE_MM = 270.0;
 const double PLACE_DISTANCE_MM = 17.0;
 
 const double PICKUP_HEIGHT_MM = 0.0;
-const double CLEAR_TOP_BOX_HEIGHT_MM = 582.706;
-const double PLACE_CUP_HEIGHT_MM = 450.0;
+const double CLEAR_TOP_BOX_HEIGHT_MM = 582.706 + 20.0;
+const double PLACE_CUP_HEIGHT_MM = 480.0;
 const double STOW_ELEVATOR_MM = 150.0;
 
 const double CLAW_OPEN_ROTATIONS = 0.8;
@@ -90,6 +93,76 @@ std::string labelDistance = "distance";
 std::string labelColorRed = "colorRed";
 std::string labelColorGreen = "colorGreen";
 std::string labelColorBlue = "colorBlue";
+
+subsystems::Drive drive(driveName, leftMotor, rightMotor, inertialSensor);
+subsystems::Elevator elevator(elevatorName, elevatorMotor, 
+  upperLimitSwitch, lowerLimitSwitch);
+subsystems::Intake intake(intakeName, intakeMotor, surfaceLimitSwitch);
+
+void prepPickup() {
+  // Claw pre open
+  intake.setPositionRotations(CLAW_OPEN_ROTATIONS, true);
+
+  // Elevator to pickup position
+  elevator.setPositionMM(PICKUP_HEIGHT_MM, true);
+}
+
+void runPickup() {
+  prepPickup();
+
+  while (distanceSensor.objectDistance(vex::mm) > PICKUP_DISTANCE_MM) {
+    // TODO Replace with line following logic
+    Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
+    Brain.Screen.newLine();
+    Brain.Screen.setCursor(1, 1);
+    
+    drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+
+    wait(5, vex::msec);
+  }
+  drive.stop();
+
+  // Claw close
+  intake.setPositionRotations(CLAW_CLOSED_ROTATIONS, true);
+
+  // Elevator to stow cup
+  elevator.setPositionMM(STOW_ELEVATOR_MM, true);
+}
+
+void runAutoPlace() {
+    // Drive to prep placing position
+  while (distanceSensor.objectDistance(vex::mm) > PREP_PLACE_DISTANCE_MM) {
+    drive.drive(vex::forward, DRIVE_SPEED_PCT, vex::velocityUnits::pct);
+
+    wait(5, vex::msec);
+  }
+  drive.stop();
+
+  // Elevator raised to clearence
+  elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM, true);
+
+  // Drive to place position
+  drive.driveDistance(vex::forward, PREP_PLACE_DISTANCE_MM - PLACE_DISTANCE_MM, 
+    vex::mm, false);
+
+  // Elevator lower to place
+  elevator.setPositionMM(PLACE_CUP_HEIGHT_MM, true);
+
+  // Claw open
+  intake.setPositionRotations(CLAW_OPEN_ROTATIONS, true);
+
+  // Elevator raise to clearence
+  elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM, true);
+
+  // Claw close
+  intake.setPositionRotations(CLAW_CLOSED_ROTATIONS, true);
+
+  // Drive backwards
+  drive.driveDistance(vex::reverse, PREP_PLACE_DISTANCE_MM, vex::mm, false);
+
+  // Elevator lower to pickup
+  elevator.setPositionMM(PICKUP_HEIGHT_MM, true);
+}
 
 int main() {
   // Initialization routine for devices that need it
@@ -112,12 +185,6 @@ int main() {
   topOpticalSensor.setLight(vex::ledState::on);
   leftOpticalSensor.setLight(vex::ledState::on);
   rightOpticalSensor.setLight(vex::ledState::on);
-
-  // Instantiate subsystems
-  subsystems::Drive drive(driveName, leftMotor, rightMotor, inertialSensor);
-  subsystems::Elevator elevator(elevatorName, elevatorMotor, 
-    upperLimitSwitch, lowerLimitSwitch);
-  subsystems::Intake intake(intakeName, intakeMotor, surfaceLimitSwitch);
 
   // NOTE Actions are waiting/blocking by default, meaning the code program
   // will wait for that action to complete before moveing on, thus why all
@@ -168,7 +235,7 @@ int main() {
       // }
 
       // Raise claw to be out of way
-      elevator.setPositionMM(STOW_ELEVATOR_MM);
+      elevator.setPositionMM(STOW_ELEVATOR_MM, true);
 
       // Drive until on side of color row
       // while (distanceSensor.objectDistance(vex::mm) > initialDistanceMM) {
@@ -182,10 +249,10 @@ int main() {
       // }
       // drive.stop();
       // wait(1, vex::sec);
-      drive.driveDistance(vex::forward, 4800.0, vex::mm);
+      drive.driveDistance(vex::forward, 4800.0, vex::mm, true);
 
       // Turn left 90 deg
-      drive.turnToAngle(vex::left, 90.0, vex::degrees);
+      drive.turnToAngle(vex::left, 90.0, vex::degrees, true);
 
       // Drive until on correct color
       // while (distanceSensor.objectDistance(vex::mm) > DOOR_DISTANCE_MM) {
@@ -200,7 +267,7 @@ int main() {
       // drive.stop();
       // wait(1, vex::sec);
       // drive.driveDistance(vex::forward, 5000.0, vex::mm);
-      drive.driveDistance(vex::forward, 4600.0, vex::mm);
+      drive.driveDistance(vex::forward, 4600.0, vex::mm, true);
 
       // if (TARGET_SINGLE_COLOR) {
       //   // while (
@@ -264,13 +331,13 @@ int main() {
       // }
 
       // Turn left 90 deg
-      drive.turnToAngle(vex::left, 90.0, vex::degrees);
+      drive.turnToAngle(vex::left, 90.0, vex::degrees, true);
 
       // Claw pre open
-      intake.setPositionRotations(CLAW_OPEN_ROTATIONS);
+      intake.setPositionRotations(CLAW_OPEN_ROTATIONS, true);
 
       // Elevator to pickup position
-      elevator.setPositionMM(PICKUP_HEIGHT_MM);
+      elevator.setPositionMM(PICKUP_HEIGHT_MM, true);
 
       // Drive until in front of cup
       if (TARGET_SINGLE_COLOR) {
@@ -299,13 +366,13 @@ int main() {
       wait(1, vex::sec);
 
       // Claw close
-      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS);
+      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS, true);
 
       // Elevator to stow cup
-      elevator.setPositionMM(STOW_ELEVATOR_MM);
+      elevator.setPositionMM(STOW_ELEVATOR_MM, true);
 
       // Turn left 90 deg
-      drive.turnToAngle(vex::left, 90.0, vex::degrees);
+      drive.turnToAngle(vex::left, 90.0, vex::degrees, true);
 
       // Drive to prep placing position
       while (distanceSensor.objectDistance(vex::mm) > PREP_PLACE_DISTANCE_MM) {
@@ -316,31 +383,32 @@ int main() {
       drive.stop();
 
       // Elevator raised to clearence
-      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM);
+      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM, true);
 
       // Drive to place position
-      drive.driveDistance(vex::forward, PREP_PLACE_DISTANCE_MM - PLACE_DISTANCE_MM, vex::mm);
+      drive.driveDistance(vex::forward, PREP_PLACE_DISTANCE_MM - PLACE_DISTANCE_MM, 
+        vex::mm, true);
 
       // Elevator lower to place
-      elevator.setPositionMM(PLACE_CUP_HEIGHT_MM);
+      elevator.setPositionMM(PLACE_CUP_HEIGHT_MM, true);
 
       // Claw open
-      intake.setPositionRotations(CLAW_OPEN_ROTATIONS);
+      intake.setPositionRotations(CLAW_OPEN_ROTATIONS, true);
 
       // Elevator raise to clearence
-      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM);
+      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM, true);
 
       // Claw close
-      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS);
+      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS, true);
 
       // Drive backwards
-      drive.driveDistance(vex::reverse, PREP_PLACE_DISTANCE_MM, vex::mm);
+      drive.driveDistance(vex::reverse, PREP_PLACE_DISTANCE_MM, vex::mm, true);
 
       // Elevator lower to pickup
-      elevator.setPositionMM(PICKUP_HEIGHT_MM);
+      elevator.setPositionMM(PICKUP_HEIGHT_MM, true);
     } else {
       // Prep Open claw
-      intake.setPositionRotations(CLAW_OPEN_ROTATIONS);
+      intake.setPositionRotations(CLAW_OPEN_ROTATIONS, true);
 
       // Drive until cup is in front of distance sensor
       while (distanceSensor.objectDistance(vex::mm) > PICKUP_DISTANCE_MM) {
@@ -350,13 +418,13 @@ int main() {
       wait(1, vex::sec);
   
       // Close claw
-      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS);
+      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS, true);
   
       // Stow elevator to clear distance sensor
-      elevator.setPositionMM(STOW_ELEVATOR_MM);
+      elevator.setPositionMM(STOW_ELEVATOR_MM, true);
   
       // Turn to boxes
-      drive.turnToAngle(vex::right, 90.0, vex::degrees);
+      drive.turnToAngle(vex::right, 90.0, vex::degrees, true);
   
       // Drive until stack of boxes is in front of robot
       while (distanceSensor.objectDistance(vex::mm) > PREP_PLACE_DISTANCE_MM) {
@@ -367,55 +435,89 @@ int main() {
       drive.stop();
   
       // Lift elevator to clearence level
-      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM);
+      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM, true);
   
       // Drive forward slightly
-      drive.driveDistance(vex::forward, PREP_PLACE_DISTANCE_MM - PLACE_DISTANCE_MM, vex::mm);
+      drive.driveDistance(vex::forward, PREP_PLACE_DISTANCE_MM - PLACE_DISTANCE_MM, 
+        vex::mm, true);
   
       // Lower elevator into box
-      elevator.setPositionMM(PLACE_CUP_HEIGHT_MM);
+      elevator.setPositionMM(PLACE_CUP_HEIGHT_MM, true);
   
       // Drop cup
-      intake.setPositionRotations(CLAW_OPEN_ROTATIONS);
+      intake.setPositionRotations(CLAW_OPEN_ROTATIONS, true);
   
       // Back out from cup
-      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM);
+      elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM, true);
   
       // Close claw
-      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS);
+      intake.setPositionRotations(CLAW_CLOSED_ROTATIONS, true);
   
       // Drive backward slightly
-      drive.driveDistance(vex::reverse, PREP_PLACE_DISTANCE_MM, vex::mm);
+      drive.driveDistance(vex::reverse, PREP_PLACE_DISTANCE_MM, vex::mm, true);
   
       // Lower elevator to pickup position
-      elevator.setPositionMM(PICKUP_HEIGHT_MM);
+      elevator.setPositionMM(PICKUP_HEIGHT_MM, true);
     }
   } else {
-    // Run periodics which will call telemetry, useful to ensure data
-    // reporting is good
-    while (true) {
-      // drive.periodic();
-      // elevator.periodic();
-      // intake.periodic();
-      elevator.printTelemetry();
-      intake.printTelemetry();
+    if (RUN_CALIBRATION_MODE) {
+      while (true) {
+        elevator.printTelemetry();
+        intake.printTelemetry();
 
-      lib::Telemetry::writeOutput(labelDistance, distanceSensor.objectDistance(vex::mm));
-      lib::Telemetry::writeOutput(labelColorRed, topOpticalSensor.getRgb().red);
-      lib::Telemetry::writeOutput(labelColorGreen, topOpticalSensor.getRgb().green);
-      lib::Telemetry::writeOutput(labelColorBlue, topOpticalSensor.getRgb().blue);
+        lib::Telemetry::writeOutput(labelDistance, distanceSensor.objectDistance(vex::mm));
+        lib::Telemetry::writeOutput(labelColorRed, topOpticalSensor.getRgb().red);
+        lib::Telemetry::writeOutput(labelColorGreen, topOpticalSensor.getRgb().green);
+        lib::Telemetry::writeOutput(labelColorBlue, topOpticalSensor.getRgb().blue);
 
-      Brain.Screen.print(topOpticalSensor.getRgb().red);
-      Brain.Screen.newLine();
-      Brain.Screen.print(topOpticalSensor.getRgb().green);
-      Brain.Screen.newLine();
-      Brain.Screen.print(topOpticalSensor.getRgb().blue);
-      Brain.Screen.newLine();
-      Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
-      Brain.Screen.newLine();
-      Brain.Screen.setCursor(1, 1);
+        Brain.Screen.print(topOpticalSensor.getRgb().red);
+        Brain.Screen.newLine();
+        Brain.Screen.print(topOpticalSensor.getRgb().green);
+        Brain.Screen.newLine();
+        Brain.Screen.print(topOpticalSensor.getRgb().blue);
+        Brain.Screen.newLine();
+        Brain.Screen.print(distanceSensor.objectDistance(vex::mm));
+        Brain.Screen.newLine();
+        Brain.Screen.setCursor(1, 1);
 
-      wait(5, vex::msec);
+        wait(5, vex::msec);
+      }
+    } else {
+      while (true) {
+        // pilotController.ButtonY.pressed(runPickup);
+        if (pilotController.ButtonY.pressing()) {
+          runAutoPlace();
+        } else if (pilotController.ButtonA.pressing()) {
+          runPickup();
+        } else {
+          if (pilotController.ButtonLeft.PRESSED) {
+            drive.turnToAngle(vex::left, 90.0, vex::degrees, true);
+          } else if (pilotController.ButtonRight.PRESSED) {
+            drive.turnToAngle(vex::right, 90.0, vex::degrees, true);
+          } else {
+            drive.arcadeDrive(
+              pilotController.Axis3.value() * 0.75, pilotController.Axis1.value() * 0.75);
+          }
+
+          // Claw bindings
+          if (pilotController.ButtonL1.pressing()) {
+            intake.setPositionRotations(CLAW_OPEN_ROTATIONS, false);
+          } else if (pilotController.ButtonR1.pressing()) {
+            intake.setPositionRotations(CLAW_CLOSED_ROTATIONS, false);
+          } else {
+            intake.stop();
+          }
+
+          // Elevator bindings
+          if (pilotController.ButtonX.pressing()) {
+            elevator.setPositionMM(CLEAR_TOP_BOX_HEIGHT_MM, false);
+          } else if (pilotController.ButtonB.pressing()) {
+            elevator.setPositionMM(PICKUP_HEIGHT_MM, false);
+          } else {
+            elevator.stop();
+          }
+        }
+      }
     }
   }
 

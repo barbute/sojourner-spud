@@ -37,7 +37,7 @@ namespace subsystems {
     motor.stop();
   }
 
-  void Elevator::setPositionMM(double targetHeightMM) {
+  void Elevator::setPositionMM(double targetHeightMM, bool blocking) {
     heightSetpointMM = targetHeightMM;
 
     // if (atUpperBound() && motor.direction() == vex::forward) {
@@ -55,7 +55,7 @@ namespace subsystems {
 
     // NOTE the robot program will cease until this action is completed,
     // may need to remove later if blocking becomes an issue
-    motor.spinToPosition(rotationSetpointDegrees, vex::degrees, true);
+    motor.spinToPosition(rotationSetpointDegrees, vex::degrees, blocking);
   }
 
   void Elevator::setVoltage(vex::directionType direction, double voltage) {

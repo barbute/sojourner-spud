@@ -32,12 +32,12 @@ namespace subsystems {
     motor.stop();
   }
 
-  void Intake::setPositionRotations(double targetPositionRotations) {
+  void Intake::setPositionRotations(double targetPositionRotations, bool blocking) {
     positionSetpointRotations = targetPositionRotations;
 
     // NOTE the robot program will cease until this action is completed,
     // may need to remove later if blocking becomes an issue
-    motor.spinToPosition(positionSetpointRotations, vex::rev, true);
+    motor.spinToPosition(positionSetpointRotations, vex::rev, blocking);
   }
 
   void Intake::setVoltage(vex::directionType direction, double voltage) {
